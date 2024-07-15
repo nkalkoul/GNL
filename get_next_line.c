@@ -10,47 +10,79 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include  <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "get_next_line.h"
 
-int	ft_buffsiz(int fd)
+int	buffsize(char *temp, int count)
 {
-	size_t 	bf;
-	char	*buffer;
-	int		count;
-	char temp;
+	int	i;
 
-	temp = 0;
-	count = 0;
-	bf = -1;
-	buffer = &temp;
-	while (*buffer != '\n')
-	{
-		bf = read(STDIN_FILENO, buffer, 1);
-		printf("buff = %s%%\n", buffer);
-		count++;
-		if (bf == 0)
+	i = 0;
+	while (temp[count] && temp[count] != '\n')
 		{
-			return (count);
+			count++;
+			i++;
 		}
-	
+	return (i);
+}
+
+char	*ft_stopline(char *temp)
+{
+	char		*line;
+	static int	count = 0;
+
+
+	line = ft_substr(temp, count, buffsize(temp, count) + 1);
+	while (temp[count] && temp[count] != '\n')
+		count++;
+	if (!temp[count - 1])
+		{
+			free(temp);
+			return (NULL);
+		}
+	count++;
+	return (line);
+}
+
+char	*get_next_line(int fd)
+{
+	int 		bf;
+	char		*buffer;
+	static char	*temp;
+	char		*line;
+
+	if (fd < 0 || fd > 1024)
+		return (NULL);
+	buffer = malloc(sizeof(char) * BUFFER_SIZE);
+	if (!buffer)
+		return (NULL);
+	bf = 1;
+	while (bf != 0 || !ft_strchr(temp, '\n'))
+	{
+		bf = read(fd, buffer, BUFFER_SIZE);
+		if (bf == -1)
+		{
+			free(buffer);
+			return (NULL);
+		}
+		buffer[bf] = '\0';
+		temp = ft_strjoin(temp, buffer);
 	}
-	printf("bf = %zu\n", bf);
-	return (count);
+	line = ft_stopline(temp);
+	if (line == NULL)
+	{
+		free(line);
+		return (NULL);
+	}
+	free(buffer);
+return (line);
 }
 
 int	main(void)
 {
-	int i = 0;
-	while (i < 3)
-	{
-		printf("count = %d\n", ft_buffsiz(STDIN_FILENO));
-		i++;
-	}
+	printf("//line =.%s%%", get_next_line(STDIN_FILENO));
+	printf("//line =.%s%%", get_next_line(STDIN_FILENO));
+	printf("//line =.%s%%", get_next_line(STDIN_FILENO));
+	printf("//line =.%s%%", get_next_line(STDIN_FILENO));
+
 	return 0;
-}
-char	*get_next_line(int fd)
-{
-	static
 }
