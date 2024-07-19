@@ -3,86 +3,91 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nas91 <kalkoul.nassim@gmail.com>           #+#  +:+       +#+        */
+/*   By: nkalkoul <nkalkoul@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024-07-01 01:29:28 by nas91             #+#    #+#             */
-/*   Updated: 2024-07-01 01:29:28 by nas91            ###   ########.fr       */
+/*   Created: 2024/07/01 01:29:28 by nas91             #+#    #+#             */
+/*   Updated: 2024/07/20 00:08:59 by nkalkoul         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include <fcntl.h>
 
-int	buffsize(char *temp, int count)
+char	*before_line(char *line)
 {
-	int	i;
-
+	size_t	i;
+	char	*new;
+	
 	i = 0;
-	while (temp[count] && temp[count] != '\n')
-		{
-			count++;
-			i++;
-		}
-	return (i);
+	while (line[i] && line[i] != '\n')
+		i++;
+	if (line[i] == '\n')
+		i++;
+	new = malloc(sizeof(char) * (i + 1));
+	if (new == NULL)
+		return (free(line), NULL);
+	ft_strlcpy(new, line, i + 1);
+	return (free(line), new);
 }
 
-char	*ft_stopline(char *temp)
+char	*after_line(char *save, char *line)
 {
-	char		*line;
-	static int	count = 0;
+	int	i;
+	int	j;
 
-
-	line = ft_substr(temp, count, buffsize(temp, count) + 1);
-	while (temp[count] && temp[count] != '\n')
-		count++;
-	if (!temp[count - 1])
-		{
-			free(temp);
-			return (NULL);
-		}
-	count++;
-	return (line);
+	i = 0;
+	j = 0;
+	while (line[i] && line[i] != '\n')
+		i++;
+	while (line[i])
+		save[j++] = line[++i];
+	return(save);
 }
 
 char	*get_next_line(int fd)
 {
 	int 		bf;
 	char		*buffer;
-	static char	*temp;
+	static char	save[BUFFER_SIZE + 1];
 	char		*line;
 
-	if (fd < 0 || fd > 1024)
+	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	buffer = malloc(sizeof(char) * BUFFER_SIZE);
-	if (!buffer)
-		return (NULL);
+	line = ft_substr(save, 0, ft_strlen(save));
+	buffer = malloc(sizeof(char) * BUFFER_SIZE + 1);
+	if (!buffer || !line)
+		return (free(buffer), free(line), NULL);
 	bf = 1;
-	while (bf != 0 || !ft_strchr(temp, '\n'))
+	while (bf != 0 && !ft_strchr(line, '\n'))
 	{
 		bf = read(fd, buffer, BUFFER_SIZE);
 		if (bf == -1)
-		{
-			free(buffer);
-			return (NULL);
-		}
+			return (free(buffer), free(line), NULL);
+		// if (bf == 0)
+			// break;
 		buffer[bf] = '\0';
-		temp = ft_strjoin(temp, buffer);
-	}
-	line = ft_stopline(temp);
-	if (line == NULL)
-	{
-		free(line);
-		return (NULL);
+		line = ft_re_strjoin(line, buffer);
 	}
 	free(buffer);
-return (line);
+	after_line(save, line);
+	line = before_line(line);
+	if (*line == '\0')
+		return (free(line), NULL);
+	return (line);
 }
 
-int	main(void)
-{
-	printf("//line =.%s%%", get_next_line(STDIN_FILENO));
-	printf("//line =.%s%%", get_next_line(STDIN_FILENO));
-	printf("//line =.%s%%", get_next_line(STDIN_FILENO));
-	printf("//line =.%s%%", get_next_line(STDIN_FILENO));
+// int	main(void)
+// {
+// 	int fd = open ("ey.txt", O_RDONLY);
+// 	char	*str;
 
-	return 0;
-}
+// 	str = get_next_line(fd);
+// 	while (str)
+// 	{
+// 		printf("%s", str);
+// 		free(str);
+// 		str = get_next_line(fd);
+// 	}
+
+// 	return 0;
+// }

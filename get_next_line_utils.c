@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nas91 <kalkoul.nassim@gmail.com>           #+#  +:+       +#+        */
+/*   By: nkalkoul <nkalkoul@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024-07-12 03:43:43 by nas91             #+#    #+#             */
-/*   Updated: 2024-07-12 03:43:43 by nas91            ###   ########.fr       */
+/*   Created: 2024/07/12 03:43:43 by nas91             #+#    #+#             */
+/*   Updated: 2024/07/19 20:03:52 by nkalkoul         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 size_t  ft_strlen(const char *s)
 {
     int     i;
-
+	
     i = 0;
     while (s[i])
         i++;
@@ -38,22 +38,25 @@ char    *ft_strchr(const char *s, char c)
     return (NULL);
 }
 
-char	*ft_strjoin(char *s1, char *s2)
+char	*ft_re_strjoin(char *s1, char *s2)
 {
 	char	*new;
 	int		i;
 	int		j;
-
+	
 	i = -1;
 	j = 0;
 	if (!s1)
 	{
-		s1 = malloc(sizeof(char) * 1);
-		s1[0] = 0;
+		s1 = malloc(sizeof(char));
+		s1[0] = '\0';
 	}
+	if (!s2)
+		return (free(s1), s1);
+	ft_strlen(s1);
 	new = malloc(sizeof(char) * (ft_strlen(s1) + ft_strlen(s2)) + 1);
 	if (!new || !s1)
-		return (NULL);
+		return (free(s1), NULL);
 	while (s1[++i])
 		new[i] = s1[i];
 	while (s2[j])
@@ -62,7 +65,7 @@ char	*ft_strjoin(char *s1, char *s2)
 		j++;
 	}
 	new[i + j] = 0;
-	return (new);
+	return (free(s1), new);
 }
 
 char	*ft_substr(char  *s, size_t start, size_t len)
@@ -73,7 +76,7 @@ char	*ft_substr(char  *s, size_t start, size_t len)
 	i = 0;
 	if (start >= ft_strlen(s))
 	{
-		new = malloc(1);
+		new = malloc(sizeof(char) + 1);
 		if (new == NULL)
 			return (NULL);
 		new[0] = '\0';
@@ -91,4 +94,18 @@ char	*ft_substr(char  *s, size_t start, size_t len)
 	}
 	new[i] = '\0';
 	return (new);
+}
+
+size_t	ft_strlcpy(char *dest, char *src, size_t len_of_s1)
+{
+	size_t	i;
+	
+	i = 0;
+	while (src[i] && i < len_of_s1)
+	{
+		dest[i] = src[i];
+		++i;
+	}
+	dest[i] = '\0';
+	return(ft_strlen(src));
 }
